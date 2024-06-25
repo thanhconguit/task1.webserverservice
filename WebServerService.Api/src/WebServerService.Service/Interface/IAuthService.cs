@@ -4,6 +4,7 @@ namespace WebServerService.Service.Interface
 {
     public interface IAuthService
     {
-        Task<string?> Login(LoginDto loginDto);
+        Task<AuthResponse> LoginAsync(LoginDto loginDto);
+        Task<AuthResponse> RefreshTokenAsync(string token, string refreshToken);
     }
 }

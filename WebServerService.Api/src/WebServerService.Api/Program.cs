@@ -11,9 +11,31 @@ using WebServerService.Data.Repository;
 using WebServerService.Domain.Const;
 using WebServerService.Service;
 using WebServerService.Service.Authorization;
+using WebServerService.Service.Events;
 using WebServerService.Service.Interface;
+using WebServerService.Service.Tcp;
+using Serilog;
+using WebServerService.Service.Notification;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Builder;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+#region Log
+builder.Host.UseSerilog();
+#endregion
+//#region Configure Kestrel server options
+//// Configure Kestrel
+//builder.WebHost.UseKestrel(options =>
+//{
+//    options.ListenAnyIP(12001, listenOptions =>
+//    {
+//        listenOptions.UseHttps(); // Automatically uses the development certificate
+//    });
+//});
+//#endregion
 
 var configuration = builder.Configuration;
 
@@ -44,6 +66,10 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+
 
 #endregion
 
@@ -72,6 +98,10 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddControllers();
+#endregion
+
+#region Configure SignalR
+builder.Services.AddSignalR();
 #endregion
 
 builder.Services.AddControllers();
@@ -139,8 +169,27 @@ using (var scope = builder.Services.BuildServiceProvider().CreateScope())
 }
 #endregion
 
-var app = builder.Build();
+#region Configure TCP Listener
+builder.Services.AddSingleton<ITcpListenerService>(sp =>
+{
+    var serviceScopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
+    var logger = sp.GetRequiredService<ILogger<TcpListenerService>>();
+    var hubContext = sp.GetRequiredService<IHubContext<NotificationHub>>();
 
+    return new TcpListenerService(13001, serviceScopeFactory, logger, hubContext);
+});
+#endregion
+
+var app = builder.Build();
+// Add CORS middleware
+#region Cors
+app.UseCors(builder => builder
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .SetIsOriginAllowed((host) => true)
+                .AllowCredentials()
+            );
+#endregion
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -157,5 +206,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<NotificationHub>("/notificationHub"); // Map SignalR hub
+
+
+var tcpListenerService = app.Services.GetRequiredService<ITcpListenerService>();
+var cts = new CancellationTokenSource();
+var tcpListenerTask = tcpListenerService.EventListeningAsync(cts.Token);
+app.Lifetime.ApplicationStopping.Register(() => cts.Cancel());
 
 app.Run();

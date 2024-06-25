@@ -7,7 +7,7 @@ namespace WebServerService.Data.Interface
     {
         [BsonId]
         [BsonRequired]
-        [BsonRepresentation(BsonType.ObjectId)]
+        [BsonRepresentation(BsonType.String)]
         Guid Id { get; set; }
     }
 }

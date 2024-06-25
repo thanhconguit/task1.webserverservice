@@ -7,12 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebServerService.Data\WebServerService.Data.csproj" />
-    <ProjectReference Include="..\WebServerService.Domain\WebServerService.Domain.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Model\" />
+    <ProjectReference Include="..\WebServerService.Data\WebServerService.Data.csproj" />
+    <ProjectReference Include="..\WebServerService.Domain\WebServerService.Domain.csproj" />
   </ItemGroup>
 
 </Project>

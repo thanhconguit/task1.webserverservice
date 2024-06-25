@@ -17,11 +17,21 @@ namespace WebServerService.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
-           var token = await _authService.Login(loginDto);
+           var token = await _authService.LoginAsync(loginDto);
 
-            if (token == null) return Unauthorized();
+            if (string.IsNullOrEmpty(token.AccessToken)) return Unauthorized();
 
-            return Ok(new { Token = token });
+            return Ok(token);
+        }
+
+        [HttpPost("token")]
+        public async Task<IActionResult> RefreshToken(RefreshTokenDto refreshTokenDto)
+        {
+            var token = await _authService.RefreshTokenAsync(refreshTokenDto.Token, refreshTokenDto.RefreshToken);
+
+            if (string.IsNullOrEmpty(token.AccessToken)) return Unauthorized();
+
+            return Ok(token);
         }
     }
 }
