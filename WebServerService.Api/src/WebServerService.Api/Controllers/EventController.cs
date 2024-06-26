@@ -24,7 +24,7 @@ namespace WebServerService.Api.Controllers
             return Ok(await _eventService.GetEventsAsync(query));
         }
 
-        [HttpPut("{eventId}")]
+        [HttpPut("{eventId}/processed")]
         [Authorize(Roles = RoleConstants.Admin + "," + RoleConstants.Contributor)]
         public async Task<IActionResult> SetEventProcessedAsync(Guid eventId)
         {
