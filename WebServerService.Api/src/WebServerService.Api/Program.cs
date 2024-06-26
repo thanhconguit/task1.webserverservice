@@ -93,7 +93,7 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = configuration["Jwt:Issuer"],
         ValidAudience = configuration["Jwt:Issuer"],
         IssuerSigningKey = new SymmetricSecurityKey(key),
-        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role" // Add this line
+        RoleClaimType = configuration["Auth:AuthClaim"] 
     };
 });
 
@@ -176,7 +176,7 @@ builder.Services.AddSingleton<ITcpListenerService>(sp =>
     var logger = sp.GetRequiredService<ILogger<TcpListenerService>>();
     var hubContext = sp.GetRequiredService<IHubContext<NotificationHub>>();
 
-    return new TcpListenerService(13001, serviceScopeFactory, logger, hubContext);
+    return new TcpListenerService(configuration.GetValue<int>("ServerConfiguration:Port"), serviceScopeFactory, logger, hubContext);
 });
 #endregion
 
@@ -207,12 +207,15 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHub<NotificationHub>("/notificationHub"); // Map SignalR hub
+#region Map SignalR hub
+app.MapHub<NotificationHub>("/notificationHub");
+#endregion
 
-
+#region Config TCP listener
 var tcpListenerService = app.Services.GetRequiredService<ITcpListenerService>();
 var cts = new CancellationTokenSource();
 var tcpListenerTask = tcpListenerService.EventListeningAsync(cts.Token);
 app.Lifetime.ApplicationStopping.Register(() => cts.Cancel());
+#endregion
 
 app.Run();

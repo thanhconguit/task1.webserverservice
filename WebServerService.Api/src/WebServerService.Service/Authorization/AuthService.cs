@@ -42,7 +42,7 @@ namespace WebServerService.Service.Authorization
         public async Task<AuthResponse> RefreshTokenAsync(string token, string refreshToken)
         {
             var principal = _tokenService.GetPrincipalFromExpiredToken(token);
-            var username = principal?.Identity?.Name; // Extract username from claims
+            var username = principal?.Identity?.Name; 
 
             var user = await _userManager.FindByNameAsync(username);
             if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiry <= DateTime.UtcNow)

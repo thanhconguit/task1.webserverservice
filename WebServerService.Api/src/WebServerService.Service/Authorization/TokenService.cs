@@ -27,12 +27,14 @@ namespace WebServerService.Service.Authorization
             var authClaims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Name, user.UserName) 
+
             };
 
             foreach (var userRole in userRoles)
             {
-                authClaims.Add(new Claim(_configuration["AuthClaim"], userRole));
+                authClaims.Add(new Claim(_configuration["Auth:AuthClaim"], userRole));
             }
 
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -40,7 +42,7 @@ namespace WebServerService.Service.Authorization
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Issuer"],
-                expires: DateTime.Now.AddMinutes(int.Parse(_configuration["Auth:AccessTokenLifetime"])),
+                expires: DateTime.Now.AddMinutes(_configuration.GetValue<int>("Auth:AccessTokenLifetime")),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
             );
@@ -66,7 +68,7 @@ namespace WebServerService.Service.Authorization
                 ValidateIssuer = false,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
-                ValidateLifetime = false // Because we are manually validating expired tokens
+                ValidateLifetime = false 
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();

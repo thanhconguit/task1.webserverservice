@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebServerService.Domain.Const;
 using WebServerService.Domain.Model;
 using WebServerService.Service.Interface;
 using WebServerService.Service.UserManagement.Dto;
@@ -17,7 +18,7 @@ namespace WebServerService.Api.Controllers
         }
 
         [HttpPost("add")]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> CreateUserAsync([FromBody] CreatedUserDto createdUserDto)
         {
             await _userService.CreateUserAsync(createdUserDto);
@@ -26,7 +27,7 @@ namespace WebServerService.Api.Controllers
         }
 
         [HttpPut("edit")]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> UpdateUserAsync([FromBody] UpdatedUserDto updatedUserDto)
         {
             await _userService.UpdateUserAsync(updatedUserDto);
@@ -35,7 +36,7 @@ namespace WebServerService.Api.Controllers
         }
 
         [HttpDelete("delete/{id}")]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> DeleteUserAsync(Guid id)
         {
             await _userService.DeleteUserAsync(id);

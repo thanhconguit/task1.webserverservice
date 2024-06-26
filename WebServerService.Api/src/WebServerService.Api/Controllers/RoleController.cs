@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebServerService.Domain.Const;
 using WebServerService.Domain.Model;
 using WebServerService.Service.Interface;
 using WebServerService.Service.RoleManagement.Dto;
@@ -19,7 +20,7 @@ namespace WebServerService.Api.Controllers
         }
 
         [HttpPost("add")]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> CreateRoleAsync([FromBody] CreateOrUpdateRoleDto createdRoleDto)
         {
             await _roleService.CreateRoleAsync(createdRoleDto);
@@ -28,7 +29,7 @@ namespace WebServerService.Api.Controllers
         }
 
         [HttpPut("edit")]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> UpdateRoleAsync([FromBody] CreateOrUpdateRoleDto updatedRoleDto)
         {
             await _roleService.UpdateRoleAsync(updatedRoleDto);
@@ -37,7 +38,7 @@ namespace WebServerService.Api.Controllers
         }
 
         [HttpDelete("delete/{id}")]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> DeleteRoleAsync(Guid id)
         {
             await _roleService.DeleteRoleAsync(id);
