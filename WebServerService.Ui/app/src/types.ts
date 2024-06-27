@@ -8,7 +8,7 @@ export interface QueryParams {
   PageIndex: number;
   PageSize: number;
   SortedField?: string;
-  SortedType?: 0 | 1;
+  SortedType?: number;
   Filters?: FilterCriterion[];
 }
 export interface Event {
@@ -16,4 +16,33 @@ export interface Event {
   data: string;
   timestamp: string;
   isProcessed: boolean;
+}
+
+export interface AssignedRole {
+  roleId: string; 
+  roleName: string; 
+}
+
+export interface User {
+  id: string; 
+  userName: string;
+  surName: string;
+  email: string;
+  phoneNumber: string;
+  assignedRole: AssignedRole; 
+}
+
+export interface CreatOrUpdateUser {
+  id?: string
+  userName: string;
+  surName: string;
+  email: string;
+  phoneNumber: string;
+  assignedRole: AssignedRole; 
+  password?: string;
+}
+
+export interface Role {
+  id : string;
+  name: string;
 }

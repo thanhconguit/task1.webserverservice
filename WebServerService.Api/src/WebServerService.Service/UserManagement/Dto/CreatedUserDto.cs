@@ -9,11 +9,11 @@ namespace WebServerService.Service.UserManagement.Dto
 
         [Required]
         [StringLength(50, MinimumLength = 1)]
-        public string Name { get; set; }
+        public string UserName { get; set; }
 
         [Required]
         [StringLength(50, MinimumLength = 1)]
-        public string Surname { get; set; }
+        public string SurName { get; set; }
 
         [Required]
         [EmailAddress]

@@ -12,6 +12,7 @@ namespace WebServerService.Service.Interface
     {
         Task DeleteRoleAsync(Guid id);
         Task<RolesDto> GetRolesAsync(AdvancedQuery query);
+        Task<RolesDto> GetAllRolesAsync();
         Task CreateRoleAsync(CreateOrUpdateRoleDto roleDto);
         Task UpdateRoleAsync(CreateOrUpdateRoleDto roleDto);
     }

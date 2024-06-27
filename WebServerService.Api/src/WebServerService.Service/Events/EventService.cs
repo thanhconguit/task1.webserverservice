@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using WebServerService.Data.Interface;
 using WebServerService.Domain.Model;
 using WebServerService.Service.Events.Dto;
@@ -16,7 +17,7 @@ namespace WebServerService.Service.Events
             _eventRepository = eventRepository;
         }
 
-        public async Task<EventsDto> GetEventsAsync(AdvancedQuery query)
+        public async Task<EventsDto> GetEventsAsync([FromBody] AdvancedQuery query)
         {
             var events = await _eventRepository.GetAllAsync(query);
 

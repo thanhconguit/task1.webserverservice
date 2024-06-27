@@ -57,6 +57,21 @@ namespace WebServerService.Service
             };
         }
 
+        public async Task<RolesDto> GetAllRolesAsync()
+        {
+            var roles = await _roleRepository.GetAllAsync();
+
+            return new RolesDto()
+            {
+                Roles = roles.Select(x => new RoleDto()
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                }),
+                TotalRecords = roles.Count()
+            };
+        }
+
         public async Task DeleteRoleAsync(Guid id)
         {
             await _roleRepository.DeleteAsync(id);

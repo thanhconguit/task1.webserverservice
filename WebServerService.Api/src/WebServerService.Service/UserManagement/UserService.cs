@@ -34,8 +34,8 @@ namespace WebServerService.Service
 
             var user = new User()
             {
-                UserName = userDto.Name,
-                Surname = userDto.Surname,
+                UserName = userDto.UserName,
+                Surname = userDto.SurName,
                 Email = userDto.Email,
                 PhoneNumber = userDto.PhoneNumber,
             };
@@ -66,6 +66,7 @@ namespace WebServerService.Service
                 currentUser.PhoneNumber = userDto.PhoneNumber;
                 currentUser.Roles = new List<Guid> { userDto.AssignedRole.RoleId };
                 currentUser.Surname = userDto.Surname;
+                currentUser.UserName = userDto.Username;
                 var result = await _userManager.UpdateAsync(currentUser);
 
                 if (!result.Succeeded)
@@ -95,8 +96,8 @@ namespace WebServerService.Service
                 Users = users.Items.Select(x => new UserDto()
                 {
                     Id = x.Id,
-                    Name = x.UserName,
-                    Surname = x.Surname,
+                    UserName = x.UserName,
+                    SurName = x.Surname,
                     AssignedRole = roles.Where(r => x.Roles.Contains(r.Id))
                                         .Select(r => new AssignedRole { RoleId = r.Id, RoleName = r.Name })
                                         .FirstOrDefault() ?? new AssignedRole(),

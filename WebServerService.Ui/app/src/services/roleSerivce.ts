@@ -1,31 +1,40 @@
 // services/roleService.ts
-import axios from 'axios';
+import axiosClient from './axiosClient';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+import { API_BASE_URL, TOKEN_KEY } from '../constant';
 
 export const addRole = async (roleData: any) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/roles`, roleData);
-    return response.data; // Assuming API returns newly added role data
+    const response = await axiosClient.post(`${API_BASE_URL}/role`, roleData);
+    return response.data; 
   } catch (error) {
-    throw new Error('Failed to add role.'); // Handle error as needed
+    throw new Error('Failed to add role.'); 
   }
 };
 
 export const editRole = async (roleId: string, updatedRoleData: any) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/roles/${roleId}`, updatedRoleData);
-    return response.data; // Assuming API returns updated role data
+    const response = await axiosClient.put(`${API_BASE_URL}/role/${roleId}`, updatedRoleData);
+    return response.data; 
   } catch (error) {
-    throw new Error('Failed to edit role.'); // Handle error as needed
+    throw new Error('Failed to edit role.'); 
   }
 };
 
 export const deleteRole = async (roleId: string) => {
   try {
-    await axios.delete(`${API_BASE_URL}/roles/${roleId}`);
-    // No return value assuming success
+    await axiosClient.delete(`${API_BASE_URL}/role/${roleId}`);
+   
   } catch (error) {
-    throw new Error('Failed to delete role.'); // Handle error as needed
+    throw new Error('Failed to delete role.'); 
   }
 };
+
+export const getAllRoles = async () => {
+  try {
+   const response = await axiosClient.get(`${API_BASE_URL}/role/all`);
+    return response.data; 
+  } catch (error) {
+    throw new Error('Failed to get roles.');
+};
+}

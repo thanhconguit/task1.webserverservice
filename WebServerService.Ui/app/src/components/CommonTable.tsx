@@ -4,7 +4,8 @@ import { Button, Input, Space, Table, message } from 'antd';
 import type { InputRef, TableColumnType, TableColumnsType } from 'antd';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
-import { QueryParams } from '../types'; 
+import { FilterCriterion, QueryParams } from '../types'; 
+import { isNullOrEmptyOrWhitespace } from '../utilities';
 
 interface CommonTableProps<T> {
   fetchData: (query: QueryParams) => Promise<{ data: T[], total: number }>;
@@ -22,6 +23,9 @@ const CommonTable = <T extends object>({ fetchData, columns }: CommonTableProps<
   const [searchText, setSearchText] = useState<string>('');
   const [searchedColumn, setSearchedColumn] = useState<string>(''); // Initialize with empty string
   const searchInput = useRef<InputRef>(null);
+  const [filters, setFilters] = useState<FilterCriterion[]>([]);
+  const [sortedField, setSortedField] = useState<string>('');
+  const [sortedType, setSortedType] = useState<number>(0);
 
   useEffect(() => {
     const fetchTableData = async () => {
@@ -30,9 +34,9 @@ const CommonTable = <T extends object>({ fetchData, columns }: CommonTableProps<
         const { data, total } = await fetchData({
           PageIndex: pagination.current,
           PageSize: pagination.pageSize,
-          SortedField: '',
-          SortedType: 0,
-          Filters: [],
+          SortedField: sortedField,
+          SortedType: sortedType,
+          Filters: filters,
         });
         setData(data);
         setTotal(total);
@@ -53,7 +57,6 @@ const CommonTable = <T extends object>({ fetchData, columns }: CommonTableProps<
       pageSize: pagination.pageSize,
     });
 
-    // Handle sorting if applicable
     if (sorter.field && sorter.order) {
       fetchData({
         PageIndex: pagination.current,
@@ -72,6 +75,14 @@ const CommonTable = <T extends object>({ fetchData, columns }: CommonTableProps<
     confirm: FilterDropdownProps['confirm'],
     dataIndex: string,
   ) => {
+    console.log(selectedKeys,dataIndex);
+    if(!isNullOrEmptyOrWhitespace(selectedKeys[0]))
+      {
+        const newFilters: FilterCriterion[] = [
+          { Column: dataIndex, Value: selectedKeys[0] },
+        ];
+        setFilters(newFilters);
+    }
     confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);

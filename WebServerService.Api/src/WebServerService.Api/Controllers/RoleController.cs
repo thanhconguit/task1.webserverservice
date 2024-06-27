@@ -52,5 +52,12 @@ namespace WebServerService.Api.Controllers
         {
             return Ok(await _roleService.GetRolesAsync(query));
         }
+
+        [HttpGet("all")]
+        [Authorize]
+        public async Task<IActionResult> GetAllRolesAsync()
+        {
+            return Ok(await _roleService.GetAllRolesAsync());
+        }
     }
 }
