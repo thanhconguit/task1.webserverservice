@@ -23,15 +23,14 @@ axiosClient.interceptors.request.use(
 );
 
 axiosClient.interceptors.response.use(
-  async (response) => {
-    
-    return response;
-  },
-  async (error) => {
-    console.error('axios interceptors response', error.response?.data ?? error);
-    return Promise.reject(error.response?.data ?? error);
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Redirect to login page or handle unauthorized access
+      window.location.href = '/login'; // Replace with your login page URL
+    }
+    return Promise.reject(error);
   }
 );
-
 export default axiosClient;
  

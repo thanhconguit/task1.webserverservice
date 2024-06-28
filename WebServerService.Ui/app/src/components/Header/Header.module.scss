@@ -1,0 +1,38 @@
+/* AppHeader.css */
+.appHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notificationIcon {
+    span svg {
+        color: #fff;
+        font-size: 20px;
+    }
+}
+
+.wFull {
+    width: 100%;
+    flex: 1;
+}
+
+/* src/components/Header.module.scss */
+.notificationMenu {
+    max-height: 400px; /* Adjust the height as needed */
+    overflow-y: auto;
+  }
+
+  @keyframes highlight {
+    0% {
+      background-color: rgb(244,244,244);
+    }
+    100% {
+      background-color: white;
+    }
+  }
+  
+  .highlight {
+    animation: highlight 2s ease-in-out;
+  }
+  

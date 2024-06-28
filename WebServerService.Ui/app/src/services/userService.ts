@@ -25,7 +25,7 @@ export const getUsers = async (
   };
   const queryString = createQueryString(query);
 
-    const response = await axiosClient.get(`${API_BASE_URL}/user?${queryString}`, {headers});
+    const response = await axiosClient.get(`${API_BASE_URL}/user?${queryString}`);
     return response.data; 
   } catch (error) {
     throw new Error('Failed to fetch users ánnsnsn');

@@ -8,6 +8,8 @@ using WebServerService.Data.Interface;
 using WebServerService.Data.Model;
 using WebServerService.Service.Interface;
 using WebServerService.Service.Notification;
+using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace WebServerService.Service.Tcp
 {
@@ -17,28 +19,43 @@ namespace WebServerService.Service.Tcp
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<TcpListenerService> _logger;
         private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly IConfiguration _configuration;
 
-        public TcpListenerService(int port, 
-            IServiceScopeFactory serviceScopeFactory, 
+        public TcpListenerService(int port,
+            IServiceScopeFactory serviceScopeFactory,
             ILogger<TcpListenerService> logger,
-            IHubContext<NotificationHub> hubContext)
+            IHubContext<NotificationHub> hubContext,
+            IConfiguration configuration)
         {
             _port = port;
             _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
             _hubContext = hubContext;
+            _configuration = configuration;
         }
 
         public async Task EventListeningAsync(CancellationToken cancellationToken)
         {
             var tcpListener = new TcpListener(IPAddress.Any, _port);
             tcpListener.Start();
-           _logger.LogInformation($"TCP Listener started on port {_port}.");
+            _logger.LogInformation($"TCP Listener started on port {_port}.");
 
             while (!cancellationToken.IsCancellationRequested)
             {
                 var client = await tcpListener.AcceptTcpClientAsync();
-                _ = Task.Run(() => ProcessEventAsync(client));
+
+                var whiteListedIp = _configuration.GetSection("WhiteListedIp").Get<string[]>();
+
+                string clientIP = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
+
+                if (whiteListedIp != null && whiteListedIp.Any() && whiteListedIp.Contains(clientIP))
+                {
+                    _ = Task.Run(() => ProcessEventAsync(client));
+                }
+                else
+                {
+                    _logger.LogWarning($"{clientIP} is not allowed to send events");
+                }
             }
         }
 
@@ -54,18 +71,16 @@ namespace WebServerService.Service.Tcp
                 var _eventRepository = scope.ServiceProvider.GetRequiredService<IEventRepository>();
 
                 // Store event in MongoDB
-                var newEvent = new Event
+                var newEvent = JsonConvert.DeserializeObject<Event>(eventData);
+
+                if (newEvent != null)
                 {
-                    Id = Guid.NewGuid(),
-                    Data = eventData,
-                    Timestamp = DateTime.UtcNow,
-                    IsProcessed = false
-                };
-                await _eventRepository.AddAsync(newEvent);
+                    await _eventRepository.AddAsync(newEvent);
 
-                await _hubContext.Clients.All.SendAsync("ReceiveNotification", newEvent.Id, newEvent);
+                    await _hubContext.Clients.All.SendAsync("ReceiveNotification", newEvent);
 
-                _logger.LogInformation($"Received and stored event: {eventData}");
+                    _logger.LogInformation($"Received and stored event: {eventData}");
+                }
             }
         }
     }

@@ -26,6 +26,7 @@ export const getEvents = async (
   const queryString = createQueryString(query);
 
     const response = await axiosClient.get(`${API_BASE_URL}/event?${queryString}`, {headers});
+    console.log(456);
     return response.data; 
   } catch (error) {
     throw new Error('Failed to fetch events');

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using WebServerService.Domain.Model;
@@ -20,17 +21,45 @@ namespace WebServerService.Domain.Utility
                 return predicate;
             }
 
+            var parameter = Expression.Parameter(typeof(T), "entity");
+
             foreach (var criterion in filterCriteria)
             {
-                var parameter = Expression.Parameter(typeof(T), "entity");
                 var property = Expression.Property(parameter, criterion.Column);
-                var value = Expression.Constant(criterion.Value);
-                var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
 
-                var containsExpression = Expression.Call(property, containsMethod, value);
-                var lambda = Expression.Lambda<Func<T, bool>>(containsExpression, parameter);
+                if (property != null)
+                {
+                    Expression comparisonExpression;
+                    var propertyType = property.Type;
 
-                predicate = predicate.And(lambda);
+                    if (propertyType == typeof(Guid))
+                    {
+                        var value = Expression.Constant(Guid.Parse(criterion.Value), typeof(Guid));
+                        comparisonExpression = Expression.Equal(property, value);
+                    }
+                    else if (propertyType == typeof(DateTime))
+                    {
+                        var value = Expression.Constant(DateTime.Parse(criterion.Value), typeof(DateTime));
+                        comparisonExpression = Expression.Equal(property, value);
+                    }
+                    else if (propertyType == typeof(string))
+                    {
+                        var value = Expression.Constant(criterion.Value, typeof(string));
+                        var containsMethod = typeof(string).GetMethod("Contains", new[] { typeof(string) });
+                        comparisonExpression = Expression.Call(property, containsMethod, value);
+                    }
+                    else
+                    {
+                        var value = Expression.Constant(Convert.ChangeType(criterion.Value, propertyType));
+                        comparisonExpression = Expression.Equal(property, value);
+                    }
+
+                    if (comparisonExpression != null)
+                    {
+                        var lambda = Expression.Lambda<Func<T, bool>>(comparisonExpression, parameter);
+                        predicate = predicate.And(lambda);
+                    }
+                }
             }
 
             return predicate;

@@ -19,6 +19,7 @@ using WebServerService.Service.Notification;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Builder;
+using WebServerService.Api.Middleware;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -175,8 +176,9 @@ builder.Services.AddSingleton<ITcpListenerService>(sp =>
     var serviceScopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
     var logger = sp.GetRequiredService<ILogger<TcpListenerService>>();
     var hubContext = sp.GetRequiredService<IHubContext<NotificationHub>>();
+    var config = sp.GetRequiredService<IConfiguration>();
 
-    return new TcpListenerService(configuration.GetValue<int>("ServerConfiguration:Port"), serviceScopeFactory, logger, hubContext);
+    return new TcpListenerService(configuration.GetValue<int>("ServerConfiguration:Port"), serviceScopeFactory, logger, hubContext, config);
 });
 #endregion
 
@@ -206,6 +208,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+#region Custom Middleware
+app.ConfigureCustomExceptionMiddleware();
+#endregion
 
 #region Map SignalR hub
 app.MapHub<NotificationHub>("/notificationHub");

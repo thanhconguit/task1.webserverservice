@@ -1,8 +1,7 @@
 // pages/Events.tsx
-import React, {useRef, useState, useEffect } from 'react';
-import CommonTable from '../components/CommonTable';
+import React, { useRef, useState, useEffect } from 'react';
 import { getEvents, markEventProcessed } from '../services/eventService';
-import { QueryParams, Event, FilterCriterion } from '../types'; 
+import { QueryParams, Event, FilterCriterion } from '../types';
 import { ColumnsType } from 'antd/es/table';
 import { SearchOutlined } from '@ant-design/icons';
 import type { InputRef, TableColumnsType, TableColumnType } from 'antd';
@@ -27,22 +26,19 @@ const Events: React.FC = () => {
   const [sortedType, setSortedType] = useState<number>(0);
   const fetchEvents = async (query: QueryParams) => {
     const data = await getEvents(query.PageIndex, query.PageSize, query.SortedField, query.SortedType, query.Filters);
-    return { data: data.events, total: data.totalRecords }; 
+    return { data: data.events, total: data.totalRecords };
   };
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps['confirm'],
     dataIndex: string,
   ) => {
-    console.log(selectedKeys,dataIndex);
-    if(!isNullOrEmptyOrWhitespace(selectedKeys[0]))
-      {
-        const newFilters: FilterCriterion[] = [
-          { Column: dataIndex, Value: selectedKeys[0] },
-        ];
-        setFilters(newFilters);
+    if (!isNullOrEmptyOrWhitespace(selectedKeys[0])) {
+      const newFilters: FilterCriterion[] = [
+        { Column: dataIndex, Value: selectedKeys[0]?.trim() },
+      ];
+      setFilters(newFilters);
     }
-    confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
@@ -106,7 +102,7 @@ const Events: React.FC = () => {
       <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
     onFilter: (value, record) =>
-        record
+      record
         .toString()
         .toLowerCase()
         .includes((value as string).toLowerCase()),
@@ -127,51 +123,46 @@ const Events: React.FC = () => {
         text
       ),
   });
-  
-  const handleTableChange = (pagination: any, filters: any, sorter: any) => {
+
+  const handleTableChange = (pagination: any, sorter: any) => {
     setPagination({
       ...pagination,
       current: pagination.current,
       pageSize: pagination.pageSize,
     });
+    console.log(sorter);
+
     if (sorter.field && sorter.order) {
+      console.log(sorter.field);
+
       setSortedField(sorter.field);
-      setSortedType(sorter.order === 'descend' ?  1 : 0);
-      fetchEvents({
-        PageIndex: pagination.current,
-        PageSize: pagination.pageSize,
-        SortedField: sorter.field,
-        SortedType: sorter.order,
-        Filters: filters
-      }).then(({ data, total }) => {
-        setData(data);
-        setTotal(total);
-      });
+      setSortedType(sorter.order === 'descend' ? 1 : 0);
     }
   }
+  const fetchTableData = async () => {
+    setLoading(true);
+    try {
+      const { data, total } = await fetchEvents({
+        PageIndex: pagination.current,
+        PageSize: pagination.pageSize,
+        SortedField: sortedField,
+        SortedType: sortedType,
+        Filters: filters,
+      });
+      setData(data);
+      setTotal(total);
+    } catch (error) {
+      message.error('Failed to fetch data.');
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchTableData = async () => {
-      setLoading(true);
-      try {
-        const { data, total } = await fetchEvents({
-          PageIndex: pagination.current,
-          PageSize: pagination.pageSize,
-          SortedField: sortedField,
-          SortedType: sortedType,
-          Filters: filters,
-        });
-       
-        setData(data);
-        setTotal(total);
-      } catch (error) {
-        message.error('Failed to fetch data.');
-      } finally {
-        setLoading(false);
-      }
-    };
+    
 
     fetchTableData();
   }, [pagination, filters, sortedField]);
+
 
   const handleProcess = async (eventId: string) => {
     try {
@@ -192,13 +183,18 @@ const Events: React.FC = () => {
       title: 'ID',
       dataIndex: 'id',
       key: 'id',
-      ...getColumnSearchProps('id')
+      ...getColumnSearchProps('id'),
+      sorter: true,
+      sortDirections: ['descend', 'ascend'],
+
     },
     {
       title: 'Data',
       dataIndex: 'data',
       key: 'data',
       ...getColumnSearchProps('data'),
+      sorter: true,
+      sortDirections: ['descend', 'ascend'],
 
     },
     {
@@ -206,6 +202,8 @@ const Events: React.FC = () => {
       dataIndex: 'timestamp',
       key: 'timestamp',
       ...getColumnSearchProps('timestamp'),
+      sorter: true,
+      sortDirections: ['descend', 'ascend'],
     },
     {
       title: 'Processed',
@@ -222,12 +220,16 @@ const Events: React.FC = () => {
     },
   ];
 
-  return <><Table columns={columns} 
-  dataSource={data}
-  rowKey="id"
-  loading={loading}
-  pagination={{ total, current: pagination.current, pageSize: pagination.pageSize }} 
-  onChange={handleTableChange}/></>;
+  return (
+    <div>
+      <Table columns={columns}
+        dataSource={data}
+        rowKey="id"
+        loading={loading}
+        pagination={{ total, current: pagination.current, pageSize: pagination.pageSize }}
+        onChange={handleTableChange} />
+    </div>
+  );
 };
 
 export default Events;

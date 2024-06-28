@@ -43,6 +43,14 @@ export interface CreatOrUpdateUser {
 }
 
 export interface Role {
-  id : string;
+  id? : string;
   name: string;
 }
+
+export interface Notification {
+  data: string;
+  timestamp: string;
+  isProcessed: boolean;
+  id: string;
+}
+

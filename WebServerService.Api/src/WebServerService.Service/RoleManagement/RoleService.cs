@@ -74,7 +74,9 @@ namespace WebServerService.Service
 
         public async Task DeleteRoleAsync(Guid id)
         {
-            await _roleRepository.DeleteAsync(id);
+            var role = await _roleManager.FindByIdAsync(id.ToString());
+            if (role == null) throw new Exception("Not found");
+            await _roleManager.DeleteAsync(role);
         }
     }
 }

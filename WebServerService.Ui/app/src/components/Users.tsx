@@ -126,18 +126,17 @@ const Users: React.FC = () => {
     confirm: FilterDropdownProps['confirm'],
     dataIndex: string,
   ) => {
-    console.log(dataIndex, selectedKeys);
     if(!isNullOrEmptyOrWhitespace(selectedKeys[0]))
       {
         const listFilter: FilterCriterion[] = [...filters.filter(f => f.Column === capitalizeFirstLetter(dataIndex)),
-          { Column: capitalizeFirstLetter(dataIndex), Value: selectedKeys[0] },
+          { Column: dataIndex, Value: selectedKeys[0]?.trim() },
         ];
         setFilters(listFilter);
     }
-    confirm();
     setSearchText(selectedKeys[0]);
     setSearchedColumn(dataIndex);
   };
+
   const handleReset = (column: string, clearFilters: () => void) => {
     clearFilters();
     setSearchText('');
@@ -227,7 +226,6 @@ const Users: React.FC = () => {
       current: pagination.current,
       pageSize: pagination.pageSize,
     });
-    console.log(filters);
     if (sorter.field && sorter.order) {
       setSortedField(capitalizeFirstLetter(sorter.field));
       setSortedType(sorter.order === 'descend' ?  1 : 0);
@@ -308,7 +306,7 @@ const Users: React.FC = () => {
       dataIndex: 'userName',
       key: 'userName',
       ...getColumnSearchProps('userName'),
-      sorter: (a, b) => a.userName.length - b.userName.length,
+      sorter: true,
       sortDirections: ['descend', 'ascend'],
     },
     {
@@ -316,7 +314,7 @@ const Users: React.FC = () => {
       dataIndex: 'surName',
       key: 'surName',
       ...getColumnSearchProps('surName'),
-      sorter: (a, b) => a.surName?.length - b.surName?.length,
+      sorter: true,
       sortDirections: ['descend', 'ascend'],
     },
     {
@@ -324,7 +322,7 @@ const Users: React.FC = () => {
       dataIndex: 'email',
       key: 'email',
       ...getColumnSearchProps('email'),
-      sorter: (a, b) => a.email.length - b.email.length,
+      sorter: true,
       sortDirections: ['descend', 'ascend'],
     },
     {
@@ -332,7 +330,7 @@ const Users: React.FC = () => {
       dataIndex: 'phoneNumber',
       key: 'phoneNumber',
       ...getColumnSearchProps('phoneNumber'),
-      sorter: (a, b) => a.phoneNumber?.length - b.phoneNumber?.length,
+      sorter: true,
       sortDirections: ['descend', 'ascend'],
     },
     {
