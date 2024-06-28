@@ -44,5 +44,5 @@ The project structure is designed to promote separation of concerns and modulari
 ## 2. Build Locally
 Set TCPClient as the startup project and run it.
 
-Security Points
+# Security Points
 The Web Server Service includes authentication and authorization. Configure a whitelist of IP addresses to block requests from unauthorized clients.
